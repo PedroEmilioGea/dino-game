@@ -2,7 +2,13 @@
 <html lang="pt-BR" data-theme="light">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Dino Game" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="assets/icon-192.png" />
   <title>Dino Game</title>
   <meta name="description" content="O clássico jogo do dinossauro do Chrome, repaginado: personagens, acessórios, cenários, velocidades, controles personalizáveis e tema claro/escuro." />
   <meta name="theme-color" content="#f6f2ea" />
@@ -24,6 +30,10 @@
         </div>
       </div>
       <div class="top-actions">
+        <button class="icon-btn" id="btnFull" type="button" aria-label="Tela cheia" title="Tela cheia" hidden>
+          <svg class="ic-enter" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg class="ic-exit" viewBox="0 0 24 24"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
         <button class="icon-btn" id="btnSound" type="button" aria-label="Ligar/desligar som" title="Som">
           <svg class="ic-on" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
           <svg class="ic-off" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M17 9l5 6M22 9l-5 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
@@ -37,6 +47,7 @@
 
     <!-- Palco do jogo -->
     <main>
+      <div class="stage-wrap">
       <section class="stage" id="stage" aria-label="Área do jogo">
         <canvas id="game" aria-label="Jogo do dinossauro"></canvas>
 
@@ -73,8 +84,9 @@
       </section>
 
       <div class="touch-controls" aria-hidden="true">
-        <button class="touch-btn" id="tDuck" type="button">▼ Abaixar</button>
-        <button class="touch-btn primary" id="tJump" type="button">▲ Pular</button>
+        <button class="touch-btn" id="tDuck" type="button"><span class="tb-ic">▼</span><span class="tb-txt">Abaixar</span></button>
+        <button class="touch-btn primary" id="tJump" type="button"><span class="tb-ic">▲</span><span class="tb-txt">Pular</span></button>
+      </div>
       </div>
 
       <!-- Menu principal -->
@@ -97,7 +109,8 @@
         </button>
       </nav>
 
-      <p class="hint" id="hint"></p>
+      <p class="hint no-touch" id="hint"></p>
+      <p class="hint only-touch">Toque na tela ou em <b>Pular</b> para pular · deslize para baixo ou segure <b>Abaixar</b> para abaixar · gire o celular para jogar em tela maior</p>
     </main>
 
     <footer class="foot">Feito com canvas e JavaScript puro · funciona offline depois de aberto</footer>

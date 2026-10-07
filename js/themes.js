@@ -9,7 +9,10 @@
   const DG = (window.DG = window.DG || {});
   const { hash, ellipse, roundRect, rgba, shade } = DG.util;
 
-  const W = 900, H = 280, GROUND = 244;
+  // Largura lógica variável: 900 no computador, menor no celular em pé.
+  let W = 900;
+  const H = 280, GROUND = 244;
+  function setWidth(w) { W = Math.round(w); }
   const TAU = Math.PI * 2;
 
   function fs(ctx, fill, stroke, lw) {
@@ -171,7 +174,7 @@
       obs: '#3f8a6c', obsShade: '#1f4d3d', obsAccent: '#d08ac7',
       flyer: '#2c2347', flyerAccent: '#b7a0dd', cloud: '#4a4576', hud: '#ece6ff',
     },
-    sky(ctx, pal, v) { stars(ctx, v, v.n); sunMoon(ctx, v, pal, 760, 62); },
+    sky(ctx, pal, v) { stars(ctx, v, v.n); sunMoon(ctx, v, pal, W - 140, 62); },
     far(ctx, pal, v) {
       // pirâmides distantes
       repeat(ctx, v.far * 0.5, 520, 0, W, (x, i, r) => {
@@ -232,7 +235,7 @@
       obs: '#6a4524', obsShade: '#2d1b0b', obsAccent: '#c9445a',
       flyer: '#2a3f66', flyerAccent: '#d08a4c', cloud: '#2a4256', hud: '#d8f3dc',
     },
-    sky(ctx, pal, v) { stars(ctx, v, v.n); sunMoon(ctx, v, pal, 740, 58); },
+    sky(ctx, pal, v) { stars(ctx, v, v.n); sunMoon(ctx, v, pal, W - 160, 58); },
     far(ctx, pal, v) {
       wave(ctx, v.far, GROUND - 46, 18, 0.005, pal.farShade, 2);
       wave(ctx, v.far * 1.4, GROUND - 26, 14, 0.008, pal.far, 7);
@@ -501,7 +504,7 @@
         }
         ctx.restore();
       }
-      sunMoon(ctx, v, pal, 770, 60);
+      sunMoon(ctx, v, pal, W - 130, 60);
     },
     far(ctx, pal, v) {
       repeat(ctx, v.far * 0.6, 150, 0, W, (x, i, r) => {
@@ -605,7 +608,7 @@
     sky(ctx, pal, v) {
       stars(ctx, v, Math.max(0.35, v.n), 90);
       // planeta com anel
-      const px = 700 - mod(v.cloud * 0.03, 1200), py = 70;
+      const px = W - 200 - mod(v.cloud * 0.03, W + 300), py = 70;
       ctx.save();
       ellipse(ctx, px, py, 38, 38);
       const g = ctx.createLinearGradient(px - 38, py - 38, px + 38, py + 38);
@@ -746,6 +749,11 @@
 
   /** Desenha uma prévia estática do cenário (usada nos cartões de seleção). */
   function drawPreview(ctx, themeId, night, t) {
+    const prevW = W;
+    W = 900;
+    try { return _drawPreview(ctx, themeId, night, t); } finally { W = prevW; }
+  }
+  function _drawPreview(ctx, themeId, night, t) {
     const theme = THEMES[themeId];
     const n = night ? 1 : 0;
     const pal = palette(theme, n);
@@ -761,7 +769,7 @@
   }
 
   DG.themes = {
-    W, H, GROUND, THEMES, THEME_ORDER,
+    get W() { return W; }, setWidth, H, GROUND, THEMES, THEME_ORDER,
     palette, drawBackground, drawGround, drawObstacle, drawPreview,
   };
 })();

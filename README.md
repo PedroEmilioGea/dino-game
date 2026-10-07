@@ -25,7 +25,12 @@ O clássico jogo do dinossauro do Google Chrome (aquele de quando você fica sem
 - **Tema claro, escuro ou automático** (segue o sistema).
 - **Teclas configuráveis**: pular, pular (alternativa), abaixar e pausar.
 - **Recordes**: top 10 local com personagem, cenário, velocidade e data.
-- **Celular**: toque para pular, botões de Pular/Abaixar na tela.
+- **Celular (responsivo)**
+  - Em pé: palco maior, botões grandes de Pular/Abaixar abaixo do jogo e menus em tela cheia.
+  - Deitado: o jogo ocupa a tela, com os botões nas laterais para os polegares.
+  - Toque na tela para pular, deslize para baixo para abaixar e use o botão de tela cheia.
+  - A largura do cenário se adapta ao formato da tela; em telas estreitas a velocidade é ajustada para manter o jogo justo, sem mudar a pontuação.
+  - Pode ser adicionado à tela inicial do celular e abre como um app, em tela cheia.
 - Efeitos sonoros gerados na hora (sem arquivos de áudio).
 
 ## Controles padrão
@@ -44,6 +49,7 @@ Todas podem ser trocadas em **Configurações**.
 ```
 DinoGame/
 ├── index.html          # página do jogo
+├── manifest.webmanifest # instalação como app no celular
 ├── css/style.css       # visual da interface (claro/escuro)
 ├── js/
 │   ├── utils.js        # funções auxiliares (cores, formas, teclas)
@@ -53,7 +59,7 @@ DinoGame/
 │   ├── audio.js        # efeitos sonoros (Web Audio)
 │   ├── game.js         # motor do jogo: física, colisão, pontuação
 │   └── ui.js           # menus, personalização e controles
-└── assets/favicon.svg
+└── assets/            # favicon e ícones do app
 ```
 
 Tudo é desenhado com Canvas 2D, sem imagens nem bibliotecas externas. As configurações ficam salvas no navegador.

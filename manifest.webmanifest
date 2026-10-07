@@ -1,0 +1,16 @@
+{
+  "name": "Dino Game",
+  "short_name": "Dino Game",
+  "description": "O clássico jogo do dinossauro do Chrome, repaginado.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#f6f2ea",
+  "theme_color": "#ff7a45",
+  "lang": "pt-BR",
+  "icons": [
+    { "src": "assets/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

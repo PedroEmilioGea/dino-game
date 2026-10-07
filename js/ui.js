@@ -115,6 +115,7 @@
   canvasEl.addEventListener('pointerdown', (e) => {
     if (e.button !== undefined && e.button !== 0) return;
     touchStartY = e.clientY;
+    if (e.pointerType === 'touch') buzz();
     if (game.state === 'paused') { game.resume(); return; }
     game.pressJump();
   });
@@ -123,6 +124,7 @@
   });
   const endPointer = () => { if (touchStartY != null) { game.releaseJump(); game.setDuck(false); touchStartY = null; } };
   canvasEl.addEventListener('pointerup', endPointer);
+  stage.addEventListener('contextmenu', (e) => e.preventDefault());
   canvasEl.addEventListener('pointercancel', endPointer);
   canvasEl.addEventListener('pointerleave', endPointer);
 
@@ -133,7 +135,8 @@
     btn.addEventListener('pointercancel', end);
     btn.addEventListener('contextmenu', (e) => e.preventDefault());
   }
-  holdButton($('#tJump'), () => game.pressJump(), () => game.releaseJump());
+  const buzz = () => { try { if (navigator.vibrate) navigator.vibrate(8); } catch (e) { /* sem vibração */ } };
+  holdButton($('#tJump'), () => { buzz(); game.pressJump(); }, () => game.releaseJump());
   holdButton($('#tDuck'), () => game.setDuck(true), () => game.setDuck(false));
 
   $('#btnStart').addEventListener('click', () => { game.start(); });
@@ -144,6 +147,28 @@
   $('#btnResume').addEventListener('click', () => game.resume());
   $('#btnRestartPause').addEventListener('click', () => { game.reset(); game.start(); });
   $('#btnRestart').addEventListener('click', () => { game.reset(); game.start(); });
+
+  /* ---------- Tela cheia (celular) ---------- */
+  const root = document.documentElement;
+  const fsSupported = !!(root.requestFullscreen || root.webkitRequestFullscreen) && (document.fullscreenEnabled || document.webkitFullscreenEnabled);
+  const isCoarse = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+  const btnFull = $('#btnFull');
+  const fsElement = () => document.fullscreenElement || document.webkitFullscreenElement;
+  if (fsSupported && isCoarse) btnFull.hidden = false;
+  btnFull.addEventListener('click', async () => {
+    try {
+      if (fsElement()) {
+        await (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+      } else {
+        await (root.requestFullscreen || root.webkitRequestFullscreen).call(root, { navigationUI: 'hide' });
+        if (screen.orientation && screen.orientation.lock) screen.orientation.lock('landscape').catch(() => {});
+      }
+    } catch (e) { toast('Tela cheia não disponível neste navegador'); }
+  });
+  const onFsChange = () => { btnFull.classList.toggle('on', !!fsElement()); setTimeout(() => game.resize(), 120); };
+  document.addEventListener('fullscreenchange', onFsChange);
+  document.addEventListener('webkitfullscreenchange', onFsChange);
+  window.addEventListener('orientationchange', () => setTimeout(() => game.resize(), 200));
 
   /* ---------- Cabeçalho ---------- */
   function updateSoundBtn() { $('#btnSound').classList.toggle('off', !data.sound); }
@@ -170,7 +195,8 @@
     $('#dockChar').textContent = `${prof.name || '—'} · ${CH.SPECIES[data.species].label}`;
     $('#dockScene').textContent = `${TH.THEMES[data.scene].label} · ${DG.SPEEDS[data.speed].label}`;
     $('#dockScores').textContent = `Recorde ${String(store.hiScore()).padStart(5, '0')}`;
-    $('#dockSettings').textContent = `Pular: ${U.keyName(data.keys.jump)} · Tema ${data.uiTheme === 'system' ? 'auto' : (data.uiTheme === 'dark' ? 'escuro' : 'claro')}`;
+    const temaTxt = data.uiTheme === 'system' ? 'auto' : (data.uiTheme === 'dark' ? 'escuro' : 'claro');
+    $('#dockSettings').textContent = isCoarse ? `Tema ${temaTxt} · som ${data.sound ? 'ligado' : 'desligado'}` : `Pular: ${U.keyName(data.keys.jump)} · Tema ${temaTxt}`;
     const k = data.keys;
     $('#hint').innerHTML =
       `<kbd class="key sm">${U.keyName(k.jump)}</kbd> / <kbd class="key sm">${U.keyName(k.jump2)}</kbd> pular (segure para pular mais alto) · ` +
@@ -406,7 +432,7 @@
     $$('#sceneGrid .scene-card').forEach((card) => {
       const c = card.querySelector('canvas');
       const ctx = hiDPI(c, 300, 93);
-      ctx.save(); ctx.scale(300 / TH.W, 93 / TH.H);
+      ctx.save(); ctx.scale(300 / 900, 93 / TH.H);
       TH.drawPreview(ctx, card.dataset.id, dark, 1.3);
       ctx.restore();
     });

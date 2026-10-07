@@ -9,7 +9,7 @@
   const U = DG.util;
   const CH = DG.characters;
   const TH = DG.themes;
-  const { W, H, GROUND } = TH;
+  const { H, GROUND } = TH;
 
   const SPEEDS = {
     slow: { label: 'Lento', desc: 'Para aquecer', base: 6.5, max: 11, accel: 0.0011 },
@@ -47,6 +47,7 @@
       this._acc = 0;
       this._loop = this._loop.bind(this);
       window.addEventListener('resize', () => this.resize());
+      if (window.ResizeObserver) new ResizeObserver(() => this.resize()).observe(canvas.parentElement || canvas);
       requestAnimationFrame(this._loop);
     }
 
@@ -77,12 +78,29 @@
       return night ? 1 : 0;
     }
 
+    /**
+     * Ajusta o canvas ao tamanho do palco. A altura lógica é fixa (280) e a
+     * largura lógica se adapta ao formato da tela: 900 no computador e algo
+     * entre 560 e 1000 no celular (em pé ou deitado). Em telas estreitas o
+     * jogo fica um pouco mais lento para compensar o menor tempo de reação.
+     */
     resize() {
       const rect = this.canvas.getBoundingClientRect();
+      if (!rect.width) return;
+      const ratio = rect.height > 0 ? rect.width / rect.height : 900 / H;
+      const w = U.clamp(Math.round(ratio * H), 560, 1000);
+      if (w !== this.W) {
+        this.W = w;
+        TH.setWidth(w);
+      }
+      this.speedScale = U.clamp(0.8 + 0.2 * (w - 560) / 340, 0.8, 1);
       const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
-      const scale = Math.max(0.2, (rect.width / W) * dpr);
-      this.canvas.width = Math.round(W * scale);
-      this.canvas.height = Math.round(H * scale);
+      const scale = Math.max(0.2, (rect.width / w) * dpr);
+      const cw = Math.round(w * scale), ch = Math.round(H * scale);
+      if (this.canvas.width !== cw || this.canvas.height !== ch) {
+        this.canvas.width = cw;
+        this.canvas.height = ch;
+      }
       this.ctx.setTransform(scale, 0, 0, scale, 0, 0);
       this.render();
     }
@@ -188,9 +206,9 @@
       }
 
       // velocidade e distância
-      const sp = this.speed;
+      const sp = this.speed * (this.speedScale || 1); // velocidade na tela
+      this.distance += this.speed; // pontuação igual em qualquer tela
       this.speed = Math.min(this.speedCfg.max, this.speed + this.speedCfg.accel);
-      this.distance += sp;
       v.far += sp * 0.12; v.mid += sp * 0.4; v.ground += sp; v.cloud += sp * 0.22;
       this.score = Math.floor(this.distance * 0.025);
       const milestone = Math.floor(this.score / 100);
@@ -238,7 +256,7 @@
     }
 
     _spawn() {
-      const th = this.theme, sp = this.speed, cfg = this.speedCfg;
+      const th = this.theme, sp = this.speed, cfg = this.speedCfg, W = TH.W;
       let o;
       if (this.score > 180 && Math.random() < 0.24) {
         const lift = U.pick([10, 44, 44, 86]);
@@ -251,7 +269,7 @@
         o = { kind: kind.id, s: S, x: W + 20, y: GROUND, w: kind.w * count * S, h: kind.h * S, kw: kind.w * S, count, seed: Math.random() * 1000 };
       }
       this.obstacles.push(o);
-      const minGap = sp * 34 + 70;
+      const minGap = sp * (this.speedScale || 1) * 34 + 70;
       this.spawnDist = o.w + U.rand(minGap, minGap * 1.85);
     }
 
@@ -368,7 +386,8 @@
     _drawHud(ctx, pal) {
       const pad = (n) => String(Math.min(99999, n)).padStart(5, '0');
       ctx.save();
-      ctx.font = '13px "Press Start 2P", ui-monospace, monospace';
+      const W = TH.W;
+      ctx.font = (W < 760 ? 16 : 13) + 'px "Press Start 2P", ui-monospace, monospace';
       ctx.textBaseline = 'top';
       ctx.textAlign = 'right';
       ctx.fillStyle = pal.hud;
@@ -376,7 +395,7 @@
       const showScore = !(this.flash > 0 && Math.floor(this.flash / 8) % 2 === 0);
       if (showScore) ctx.fillText(pad(this.score), W - 18, 16);
       ctx.globalAlpha = 0.65;
-      ctx.fillText('HI ' + pad(hi), W - 18 - 92, 16);
+      ctx.fillText('HI ' + pad(hi), W - 18 - ctx.measureText('00000').width - 24, 16);
       ctx.restore();
     }
   }
