@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Dino Game</title>
+  <meta name="description" content="O clássico jogo do dinossauro do Chrome, repaginado: personagens, acessórios, cenários, velocidades, controles personalizáveis e tema claro/escuro." />
+  <meta name="theme-color" content="#f6f2ea" />
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800;900&family=Press+Start+2P&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="app">
+    <!-- Cabeçalho -->
+    <header class="topbar">
+      <div class="brand">
+        <canvas id="brandIcon" class="brand-icon" width="48" height="48" aria-hidden="true"></canvas>
+        <div>
+          <h1 class="brand-title">DINO GAME</h1>
+          <p class="brand-sub">O clássico do “sem internet”, repaginado</p>
+        </div>
+      </div>
+      <div class="top-actions">
+        <button class="icon-btn" id="btnSound" type="button" aria-label="Ligar/desligar som" title="Som">
+          <svg class="ic-on" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <svg class="ic-off" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M17 9l5 6M22 9l-5 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+        <button class="icon-btn" id="btnTheme" type="button" aria-label="Alternar tema claro/escuro" title="Tema claro/escuro">
+          <svg class="ic-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.5"/><g stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></g></svg>
+          <svg class="ic-moon" viewBox="0 0 24 24"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Palco do jogo -->
+    <main>
+      <section class="stage" id="stage" aria-label="Área do jogo">
+        <canvas id="game" aria-label="Jogo do dinossauro"></canvas>
+
+        <button class="stage-btn pause-btn" id="btnPause" type="button" aria-label="Pausar" title="Pausar">
+          <svg viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1.5"/><rect x="14" y="5" width="4" height="14" rx="1.5"/></svg>
+        </button>
+
+        <div class="overlay" id="overlay" data-state="ready">
+          <div class="ov-panel ov-ready">
+            <p class="ov-title no-touch">Pressione <kbd class="key" data-key="jump">Espaço</kbd> para começar</p>
+            <p class="ov-title only-touch">Toque na tela para começar</p>
+            <p class="ov-sub no-touch"><span data-key-label="jump2"></span> também pula · <kbd class="key sm" data-key="duck">↓</kbd> abaixa</p>
+            <p class="ov-sub only-touch">Dica: gire o celular para jogar na horizontal</p>
+            <button class="btn primary big" id="btnStart" type="button">
+              <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> Jogar
+            </button>
+          </div>
+          <div class="ov-panel ov-paused">
+            <p class="ov-title pixel">PAUSADO</p>
+            <div class="ov-actions">
+              <button class="btn primary" id="btnResume" type="button">Continuar</button>
+              <button class="btn ghost" id="btnRestartPause" type="button">Reiniciar</button>
+            </div>
+          </div>
+          <div class="ov-panel ov-over">
+            <p class="ov-title pixel">GAME OVER</p>
+            <p class="ov-score"><span id="ovScore">00000</span> pontos <span class="badge" id="ovBadge" hidden></span></p>
+            <button class="restart" id="btnRestart" type="button" aria-label="Jogar de novo">
+              <svg viewBox="0 0 24 24"><path d="M12 5V2L7 6l5 4V7a5 5 0 1 1-5 5H5a7 7 0 1 0 7-7z"/></svg>
+            </button>
+            <p class="ov-sub no-touch">ou pressione <kbd class="key sm" data-key="jump">Espaço</kbd></p>
+          </div>
+        </div>
+      </section>
+
+      <div class="touch-controls" aria-hidden="true">
+        <button class="touch-btn" id="tDuck" type="button">▼ Abaixar</button>
+        <button class="touch-btn primary" id="tJump" type="button">▲ Pular</button>
+      </div>
+
+      <!-- Menu principal -->
+      <nav class="dock" aria-label="Menu">
+        <button class="dock-btn" data-open="dlgChar" type="button">
+          <span class="dock-ic c1"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0z"/></svg></span>
+          <span class="dock-txt"><b>Personagem</b><small id="dockChar">Rex · Dino</small></span>
+        </button>
+        <button class="dock-btn" data-open="dlgScene" type="button">
+          <span class="dock-ic c2"><svg viewBox="0 0 24 24"><path d="M2 19l6-9 4 5 3-4 7 8z"/><circle cx="17" cy="6" r="2.5"/></svg></span>
+          <span class="dock-txt"><b>Cenário</b><small id="dockScene">Deserto · Normal</small></span>
+        </button>
+        <button class="dock-btn" data-open="dlgSettings" type="button">
+          <span class="dock-ic c3"><svg viewBox="0 0 24 24"><path d="M19.4 13a7.6 7.6 0 0 0 0-2l2-1.6-2-3.4-2.4 1a7 7 0 0 0-1.7-1L15 3.5h-4l-.4 2.5a7 7 0 0 0-1.7 1l-2.4-1-2 3.4 2 1.6a7.6 7.6 0 0 0 0 2l-2 1.6 2 3.4 2.4-1a7 7 0 0 0 1.7 1l.4 2.5h4l.4-2.5a7 7 0 0 0 1.7-1l2.4 1 2-3.4zM12 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z"/></svg></span>
+          <span class="dock-txt"><b>Configurações</b><small id="dockSettings">Teclas, tema e som</small></span>
+        </button>
+        <button class="dock-btn" data-open="dlgScores" type="button">
+          <span class="dock-ic c4"><svg viewBox="0 0 24 24"><path d="M7 3h10v3h3v3a5 5 0 0 1-5 5h-.3A5 5 0 0 1 13 15.9V18h3v3H8v-3h3v-2.1A5 5 0 0 1 9.3 14H9a5 5 0 0 1-5-5V6h3zm0 5H6v1a3 3 0 0 0 1.4 2.5A5 5 0 0 1 7 9zm10 0v1a5 5 0 0 1-.4 2.5A3 3 0 0 0 18 9V8z"/></svg></span>
+          <span class="dock-txt"><b>Recordes</b><small id="dockScores">Recorde 00000</small></span>
+        </button>
+      </nav>
+
+      <p class="hint" id="hint"></p>
+    </main>
+
+    <footer class="foot">Feito com canvas e JavaScript puro · funciona offline depois de aberto</footer>
+  </div>
+
+  <!-- ============ Personagem ============ -->
+  <dialog class="sheet wide" id="dlgChar" aria-labelledby="dlgCharTitle">
+    <div class="sheet-head">
+      <h2 id="dlgCharTitle">Personagem</h2>
+      <button class="icon-btn close" type="button" data-close aria-label="Fechar">✕</button>
+    </div>
+    <div class="char-layout">
+      <div class="char-preview">
+        <div class="preview-box">
+          <canvas id="charPreview" width="320" height="260"></canvas>
+          <div class="pose-btns" role="group" aria-label="Pose da prévia">
+            <button type="button" data-pose="run" class="active">Correndo</button>
+            <button type="button" data-pose="jump">Pulando</button>
+            <button type="button" data-pose="duck">Abaixado</button>
+            <button type="button" data-pose="idle">Parado</button>
+          </div>
+        </div>
+        <label class="field">
+          <span>Nome do personagem</span>
+          <input id="charName" type="text" maxlength="14" autocomplete="off" spellcheck="false" placeholder="Dê um nome" />
+        </label>
+        <div class="row-btns">
+          <button class="btn ghost" id="btnRandom" type="button">🎲 Aleatório</button>
+          <button class="btn ghost" id="btnResetChar" type="button">Limpar visual</button>
+        </div>
+      </div>
+      <div class="char-options">
+        <h3>Escolha o animal</h3>
+        <div class="species-grid" id="speciesGrid"></div>
+        <h3>Cor</h3>
+        <div class="swatches" id="bodyColors"></div>
+        <h3>Acessórios</h3>
+        <div class="tabs" id="accTabs" role="tablist"></div>
+        <div class="acc-grid" id="accGrid"></div>
+        <div class="acc-color">
+          <span id="accColorLabel">Cor</span>
+          <div class="swatches small" id="accColors"></div>
+        </div>
+      </div>
+    </div>
+    <div class="sheet-foot">
+      <button class="btn primary" type="button" id="btnCharPlay">Jogar</button>
+    </div>
+  </dialog>
+
+  <!-- ============ Cenário ============ -->
+  <dialog class="sheet wide" id="dlgScene" aria-labelledby="dlgSceneTitle">
+    <div class="sheet-head">
+      <h2 id="dlgSceneTitle">Cenário e velocidade</h2>
+      <button class="icon-btn close" type="button" data-close aria-label="Fechar">✕</button>
+    </div>
+    <h3>Tema do cenário</h3>
+    <div class="scene-grid" id="sceneGrid"></div>
+    <h3>Velocidade</h3>
+    <div class="segmented speed" id="speedSeg"></div>
+    <label class="switch-row">
+      <span><b>Ciclo dia e noite</b><small>Alterna entre dia e noite a cada 700 pontos, como no Chrome</small></span>
+      <input type="checkbox" id="optDayNight" class="switch" />
+    </label>
+    <div class="sheet-foot">
+      <button class="btn primary" type="button" id="btnScenePlay">Jogar</button>
+    </div>
+  </dialog>
+
+  <!-- ============ Configurações ============ -->
+  <dialog class="sheet" id="dlgSettings" aria-labelledby="dlgSettingsTitle">
+    <div class="sheet-head">
+      <h2 id="dlgSettingsTitle">Configurações</h2>
+      <button class="icon-btn close" type="button" data-close aria-label="Fechar">✕</button>
+    </div>
+    <h3>Controles</h3>
+    <p class="muted">Clique na tecla e depois pressione a nova tecla desejada (Esc cancela).</p>
+    <div class="keys" id="keyList"></div>
+    <button class="btn ghost sm" id="btnKeysDefault" type="button">Restaurar teclas padrão</button>
+
+    <h3>Aparência</h3>
+    <div class="segmented" id="themeSeg">
+      <button type="button" data-val="light">☀️ Claro</button>
+      <button type="button" data-val="dark">🌙 Escuro</button>
+      <button type="button" data-val="system">💻 Sistema</button>
+    </div>
+
+    <h3>Jogo</h3>
+    <label class="switch-row">
+      <span><b>Efeitos sonoros</b><small>Pulo, pontuação e batida</small></span>
+      <input type="checkbox" id="optSound" class="switch" />
+    </label>
+    <label class="switch-row">
+      <span><b>Mostrar nome</b><small>Exibe o nome acima do personagem durante o jogo</small></span>
+      <input type="checkbox" id="optNameTag" class="switch" />
+    </label>
+
+    <h3>Dados</h3>
+    <div class="row-btns">
+      <button class="btn danger ghost" id="btnClearScores" type="button">Apagar recordes</button>
+      <button class="btn danger ghost" id="btnResetAll" type="button">Restaurar tudo</button>
+    </div>
+  </dialog>
+
+  <!-- ============ Recordes ============ -->
+  <dialog class="sheet" id="dlgScores" aria-labelledby="dlgScoresTitle">
+    <div class="sheet-head">
+      <h2 id="dlgScoresTitle">Recordes</h2>
+      <button class="icon-btn close" type="button" data-close aria-label="Fechar">✕</button>
+    </div>
+    <div id="scoreList"></div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="js/utils.js"></script>
+  <script src="js/characters.js"></script>
+  <script src="js/themes.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/ui.js"></script>
+</body>
+</html>
